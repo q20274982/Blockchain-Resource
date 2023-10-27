@@ -37,8 +37,33 @@ contract TransparentTest is Test {
   function test_transparent_upgradeToAndCall_success() public {
     // TODO:
     // 1. check if proxy is correctly proxied,  assert that proxyWallet.VERSION() is "0.0.1"
+    wallet = MultiSigWallet(address(proxy));
+    assertEq(
+      wallet.VERSION(),
+      "0.0.1"
+    );
+
     // 2. assert if user call upgradeToAndCall will revert
+    vm.expectRevert();
+    
     // 3. upgrade to V2
+    vm.startPrank(admin);
+    ITransparentUpgradeableProxy(address(proxy)).upgradeToAndCall(
+      address(walletV2),
+      abi.encodeWithSelector(walletV2.initialize.selector, [alice, bob, carol])
+    );
+    assertEq(
+      walletV2.VERSION(),
+      "0.0.2"
+    );
+    vm.stopPrank();
     // 4. assert user call upgradeToAndCall will return "23573451"
+    vm.startPrank(alice);
+    (bool success, bytes memory data) = walletV2.call(
+      abi.encodeWithSelector(),
+
+    );
+    
+    vm.stopPrank();
   }
 }

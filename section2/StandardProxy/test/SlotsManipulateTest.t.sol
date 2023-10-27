@@ -36,30 +36,49 @@ contract SlotManipulateTest is Test {
   function test_value_set() public {
     // TODO:
     // 1. set bytes32(keccak256("appwork.week8")) to 2023_4_27
+    instance.setAppworksWeek8(2023_4_27);
 
     // 2. Assert that the value is set 
-    // assertEq(
-    //   uint256(vm.load(address(instance), keccak256("appworks.week8"))),
-    //   2023_10_26
-    // );
+    assertEq(
+      uint256(vm.load(address(instance), keccak256("appworks.week8"))),
+      2023_10_26
+    );
   }
 
   function test_set_Proxy_Implementation() public {
     // TODO:
     // 1. set Proxy Implementation address
+    randomAddress = makeAddr("51");
+    instance.setProxyImplementation(randomAddress);
     // 2. assert that value is set 
+    assertEq(
+      bytes32ToAddress(vm.load(address(instance), bytes32(uint(keccak256("eip1967.proxy.implementation")) - 1))),
+      randomAddress
+    );
   }
 
   function test_set_Beacon_Implementation() public {
     // TODO:
     // 1. set Beacon Implementation address
+    randomAddress = makeAddr("51");
+    instance.setBeaconImplementation(randomAddress);
     // 2. assert that value is set 
+    assertEq(
+      bytes32ToAddress(vm.load(address(instance), bytes32(uint(keccak256("eip1967.proxy.beacon")) - 1))),
+      randomAddress
+    );
   }
 
   function test_set_Admin_Implementation() public {
     // TODO:
     // 1. set admin address
+    randomAddress = makeAddr("51");
+    instance.setAdminImplementation(randomAddress);
     // 2. assert that value is set 
+    assertEq(
+      bytes32ToAddress(vm.load(address(instance), bytes32(uint(keccak256("eip1967.proxy.admin")) - 1))),
+      randomAddress
+    );
   }
 
   function test_set_Proxiable_Implementation() public {

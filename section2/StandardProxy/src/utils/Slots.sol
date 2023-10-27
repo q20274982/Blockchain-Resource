@@ -26,21 +26,26 @@ contract SlotsManipulate is Slots {
 
   function setAppworksWeek8(uint256 amount) external {
     // TODO: set AppworksWeek8
+    _setSlotToUint256(keccak256("appworks.week8"), amount);
   }
 
   function setProxyImplementation(address _implementation) external {
     // TODO: set Proxy Implenmentation address
+    _setSlotToAddress(bytes32(uint(keccak256("eip1967.proxy.implementation")) - 1), _implementation);
   }
 
   function setBeaconImplementation(address _implementation) external {
     // TODO: set Beacon Implenmentation address
+    _setSlotToAddress(bytes32(uint(keccak256("eip1967.proxy.beacon")) - 1), _implementation);
   }
 
   function setAdminImplementation(address _who) external {
     // TODO: set Admin Implenmentation address
+    _setSlotToAddress(bytes32(uint(keccak256("eip1967.proxy.admin")) - 1), _who);
   }
 
   function setProxiable(address _implementation) external {
     // TODO: set Proxiable Implenmentation address
+    _setSlotToAddress(keccak256("PROXIABLE"), _implementation);
   }
 }
