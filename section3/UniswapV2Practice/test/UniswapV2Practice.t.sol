@@ -46,7 +46,17 @@ contract UniswapV2PracticeTest is Test {
     // # Practice 1: maker add liquidity (100 ETH, 10000 USDC)
     function test_maker_addLiquidityETH() public {
         // Implement here
-
+        vm.startPrank(maker);
+        TestERC20(testUSDC).approve(address(UNISWAP_V2_ROUTER), type(uint256).max);
+        UNISWAP_V2_ROUTER.addLiquidityETH{value: 100 ether}(
+            address(testUSDC),
+            10000 * 10 ** testUSDC.decimals(),
+            0,
+            0,
+            maker,
+            block.timestamp + 100
+        );
+        vm.stopPrank();
         // Checking
         IUniswapV2Pair wethUsdcPair = IUniswapV2Pair(UNISWAP_V2_FACTORY.getPair(address(WETH9), address(testUSDC)));
         (uint112 reserve0, uint112 reserve1, ) = wethUsdcPair.getReserves();
@@ -58,6 +68,33 @@ contract UniswapV2PracticeTest is Test {
     function test_taker_swapExactETHForTokens() public {
         uint256 takerOriginalUsdcBalance = testUSDC.balanceOf(taker);
         // Implement here
+        vm.startPrank(maker);
+        TestERC20(testUSDC).approve(address(UNISWAP_V2_ROUTER), type(uint256).max);
+        UNISWAP_V2_ROUTER.addLiquidityETH{value: 100 ether}(
+            address(testUSDC),
+            10000 * 10 ** testUSDC.decimals(),
+            0,
+            0,
+            maker,
+            block.timestamp + 100
+        );
+        vm.stopPrank();
+        vm.startPrank(taker);
+        address[] memory path = new address[](2);
+        path[0] = address(WETH9);
+        path[1] = address(testUSDC);
+        UNISWAP_V2_ROUTER.swapExactETHForTokens{ value: 1 ether }(
+            0,
+            path,
+            taker,
+            block.timestamp + 100
+        );
+        vm.stopPrank();
+
+        // 100 ETH, 10000 USDC
+        // take 0.03 fee
+        // (100 + 1 * 0.997) ETH, 9,901.2841965603 USDC
+        // 10000 - 9901 = 98.7158034397
 
         // Checking
         // # Discussion 1: why 98715803 ?
@@ -69,7 +106,31 @@ contract UniswapV2PracticeTest is Test {
     function test_taker_swapExactTokensForETH() public {
         uint256 takerOriginalETHBalance = taker.balance;
         // Implement here
-
+        vm.startPrank(maker);
+        TestERC20(testUSDC).approve(address(UNISWAP_V2_ROUTER), type(uint256).max);
+        UNISWAP_V2_ROUTER.addLiquidityETH{value: 100 ether}(
+            address(testUSDC),
+            10000 * 10 ** testUSDC.decimals(),
+            0,
+            0,
+            maker,
+            block.timestamp + 100
+        );
+        vm.stopPrank();
+        vm.startPrank(taker);
+        TestERC20(testUSDC).approve(address(UNISWAP_V2_ROUTER), type(uint256).max);
+        address[] memory path = new address[](2);
+        path[0] = address(testUSDC);
+        path[1] = address(WETH9);
+        UNISWAP_V2_ROUTER.swapExactTokensForETH(
+            100 * 10 ** testUSDC.decimals(),
+            0,
+            path,
+            taker,
+            block.timestamp + 100
+        );
+        vm.stopPrank();
+        
         // Checking
         // # Discussion 2: why 987158034397061298 ?
         assertEq(testUSDC.balanceOf(taker), 0);
@@ -79,9 +140,31 @@ contract UniswapV2PracticeTest is Test {
     // # Practice 4: maker remove all liquidity
     function test_maker_removeLiquidityETH() public {
         // Implement here
-
-        // Checking
         IUniswapV2Pair wethUsdcPair = IUniswapV2Pair(UNISWAP_V2_FACTORY.getPair(address(WETH9), address(testUSDC)));
+        vm.startPrank(maker);
+        TestERC20(testUSDC).approve(address(UNISWAP_V2_ROUTER), type(uint256).max);
+        UNISWAP_V2_ROUTER.addLiquidityETH{value: 100 ether}(
+            address(testUSDC),
+            10000 * 10 ** testUSDC.decimals(),
+            0,
+            0,
+            maker,
+            block.timestamp + 100
+        );
+        vm.stopPrank();
+        vm.startPrank(maker);
+        uint256 bal = wethUsdcPair.balanceOf(maker);
+        wethUsdcPair.approve(address(UNISWAP_V2_ROUTER), bal);
+        UNISWAP_V2_ROUTER.removeLiquidityETH(
+            address(testUSDC),
+            bal,
+            0,
+            0,
+            maker,
+            block.timestamp * 100
+            );
+        vm.stopPrank();
+        // Checking
         (uint112 reserve0, uint112 reserve1, ) = wethUsdcPair.getReserves();
         assertEq(reserve0, 1); // MINIMUM_LIQUIDITY
         assertEq(reserve1, 100000000); // MINIMUM_LIQUIDITY
