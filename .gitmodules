@@ -94,3 +94,6 @@
 [submodule "section3/CompoundHW/lib/compound-protocol"]
 	path = section3/CompoundHW/lib/compound-protocol
 	url = https://github.com/compound-finance/compound-protocol
+[submodule "section3/CompoundHW/lib/openzeppelin-contracts"]
+	path = section3/CompoundHW/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
