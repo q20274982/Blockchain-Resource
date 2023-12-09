@@ -22,15 +22,50 @@ contract GovernanceScript is Script {
   Timelock constant public timelock = Timelock(payable(0x93C485BC5F028C36dFf0B9add0dCAfb080cb7dd7));
   Comp constant public comp = Comp(payable(0x8dCb0C9a616bEdcf70eB826BA8Cfc8a11b420EE7));
 
+  address PKM = vm.envAddress('PUBLIC_KEY_MAIN');
+  uint256 SKM = vm.envUint('PRIVATE_KEY_MAIN');
+
+  address PKS = vm.envAddress('PUBLIC_KEY_SECN');
+  uint256 SKS = vm.envUint('PRIVATE_KEY_SECN');
+
   function delegateVotingPower() public {
     // TODO: Distribute Comp into two addresses, delegate one address to yourself,
     // and delegate the other address to your team member.
 
+    vm.startBroadcast(SKS);
+    comp.transfer(PKM, 100e18);
+    comp.delegate(PKS);
+    vm.stopBroadcast();
+
+    vm.startBroadcast(SKM);
+    comp.delegate(PKS);
+    vm.stopBroadcast();
+
+    console.logUint(comp.balanceOf(PKM));
+    console.logUint(comp.balanceOf(PKS));
+
+    uint96 votingPower = comp.getCurrentVotes(PKS);
+    console.logUint(votingPower / 1e18);
   }
 
   function propose() public {
-    // TODO: Submit a proposal, remember that your address requires 200 COMP of voting power.
-
+    // TODO: Submit a proposal, remember that your address requires 100 COMP of voting power.
+    vm.startBroadcast(SKS);
+    address[] memory targets = new address[](1);
+    targets[0] = address(unitroller);
+    uint256[] memory values = new uint256[](1);
+    values[0] = 0;
+    string[] memory signatures = new string[](1);
+    signatures[0] = "_supportMarket(CToken)";
+    bytes[] memory data = new bytes[](1);
+    data[0] = abi.encode(address(cToken));
+    string memory description = "Support cToken";
+    
+    (bool isSuccess, bytes memory _data) = address(bravo).call(abi.encodeWithSignature("propose(address[],uint256[],string[],bytes[],string)", targets, values, signatures, data, description));
+    console.logBool(isSuccess);
+    (uint256 proposalId) = abi.decode(_data, (uint256));
+    console.logUint(proposalId);
+    vm.stopBroadcast();
   }
 
   function vote() public {
