@@ -57,7 +57,7 @@ contract CompoundHWScript is Script {
         cUTDelegate = new CErc20Delegate();
         CErc20Delegator cUT = new CErc20Delegator(
             address(ut), // underlying
-            comptroller, // comptroller
+            unitrollerProxy, // comptroller
             WhitePaperInterestRateModel(whitePaper), // interestRateModel
             1 * 1e18, // initialExchangeRateMantissa, 初始 exchangeRate 為 1:1
             "Compound UT", // name
